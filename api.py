@@ -1,25 +1,44 @@
 import streamlit as st
-from transformers import pipeline
+import nltk
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lex_rank import LexRankSummarizer
 
-# Set up the summarization pipeline
-model_name = "sshleifer/distilbart-cnn-12-6"
-summarizer = pipeline("summarization", model=model_name)
+def download_nltk_resources():
+    nltk.download("punkt")
 
-# Streamlit app title and description
-st.title("Text Summarization")
-st.markdown("This app uses the Hugging Face Transformers library to summarize text.")
+def summarize_text(text, num_sentences):
+    # Create a parser and tokenizer
+    parser = PlaintextParser.from_string(text, Tokenizer("english"))
+    
+    # Create a LexRank summarizer
+    summarizer = LexRankSummarizer()
+    
+    # Summarize the text
+    summary = summarizer(parser.document, num_sentences)
+    
+    # Join the summary sentences into a single string
+    summary_text = " ".join(str(sentence) for sentence in summary)
+    
+    return summary_text
 
-# Text input box
-text = st.text_area("Enter text to be summarized", height=200)
-
-# Summarization button
-if st.button("Summarize"):
-    if text:
-        # Generate the summary
-        summary = summarizer(text, max_length=150, min_length=30, do_sample=False)[0]["summary_text"]
-        
-        # Display the summary
-        st.markdown("### Summary")
+def main():
+    st.title("Text Summarizer")
+    
+    # Download the necessary NLTK resources
+    download_nltk_resources()
+    
+    # Get user input text
+    text = st.text_area("Enter the text to summarize:")
+    
+    # Get the number of sentences for the summary
+    num_sentences = st.slider("Select the number of sentences for the summary:", 1, 10, 3)
+    
+    # Summarize the text when the user clicks the button
+    if st.button("Summarize"):
+        summary = summarize_text(text, num_sentences)
+        st.subheader("Summary:")
         st.write(summary)
-    else:
-        st.warning("Please enter some text to be summarized.")
+
+if _name_ == "_main_":
+    main()
