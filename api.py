@@ -40,5 +40,5 @@ def main():
         st.subheader("Summary:")
         st.write(summary)
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
