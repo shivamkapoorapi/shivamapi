@@ -1,44 +1,21 @@
 import streamlit as st
-import nltk
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lex_rank import LexRankSummarizer
+from transformers import pipeline
 
-def download_nltk_resources():
-    nltk.download("punkt")
+# Load the summarization pipeline
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
-def summarize_text(text, num_sentences):
-    # Create a parser and tokenizer
-    parser = PlaintextParser.from_string(text, Tokenizer("english"))
-    
-    # Create a LexRank summarizer
-    summarizer = LexRankSummarizer()
-    
-    # Summarize the text
-    summary = summarizer(parser.document, num_sentences)
-    
-    # Join the summary sentences into a single string
-    summary_text = " ".join(str(sentence) for sentence in summary)
-    
-    return summary_text
-
+# Define the Streamlit app
 def main():
     st.title("Text Summarizer")
-    
-    # Download the necessary NLTK resources
-    download_nltk_resources()
-    
-    # Get user input text
-    text = st.text_area("Enter the text to summarize:")
-    
-    # Get the number of sentences for the summary
-    num_sentences = st.slider("Select the number of sentences for the summary:", 1, 10, 3)
-    
-    # Summarize the text when the user clicks the button
+    article = st.text_area("Enter the article:", height=200)
     if st.button("Summarize"):
-        summary = summarize_text(text, num_sentences)
-        st.subheader("Summary:")
-        st.write(summary)
+        if article:
+            # Generate the summary
+            summary = summarizer(article, max_length=130, min_length=30, do_sample=False)
+            st.success(summary[0]['summary_text'])
+        else:
+            st.warning("Please enter some text.")
 
-if __name__ == "__main__":
+# Run the app
+if __name__ == '__main__':
     main()
