@@ -2,7 +2,8 @@ import streamlit as st
 from transformers import pipeline
 
 # Set up the summarization pipeline
-summarizer = pipeline("summarization")
+model_name = "sshleifer/distilbart-cnn-12-6"
+summarizer = pipeline("summarization", model=model_name)
 
 # Streamlit app title and description
 st.title("Text Summarization")
